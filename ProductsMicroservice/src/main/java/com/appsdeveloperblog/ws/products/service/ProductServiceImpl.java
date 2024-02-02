@@ -12,14 +12,11 @@ import java.util.concurrent.CompletableFuture;
 
 @Service
 public class ProductServiceImpl implements ProductService{
-
     private final Logger LOG = LoggerFactory.getLogger(this.getClass());
     KafkaTemplate<String, ProductCreatedEvent> kafkaTemplate;
-
     public ProductServiceImpl(KafkaTemplate<String, ProductCreatedEvent> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
     }
-
     @Override
     public String create(CreatedProductRequest product) {
         final var productId = UUID.randomUUID().toString();
@@ -29,12 +26,14 @@ public class ProductServiceImpl implements ProductService{
 
         CompletableFuture<SendResult<String, ProductCreatedEvent>> future = kafkaTemplate
                 .send("product-created-events-topic", productId, event);
-
         future.whenComplete((result, error) -> {
            if(error != null){
                 LOG.error("Failed to send message " + error.getMessage());
            }else {
-                LOG.info("Message send succesfully " + result.getRecordMetadata());
+               LOG.info("Message send succesfully " + result.getRecordMetadata());
+               LOG.info("Partition: " + result.getRecordMetadata().partition());
+               LOG.info("Topic: " +result.getRecordMetadata().topic());
+               LOG.info("Offset: " + result.getRecordMetadata().offset());
            }
         });
         LOG.info("***** Returning product id " + productId);

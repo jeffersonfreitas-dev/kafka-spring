@@ -1,5 +1,6 @@
 package com.appsdeveloperblog.ws.products.service;
 
+import com.appdeveloperblog.ws.core.ProductCreatedEvent;
 import com.appsdeveloperblog.ws.products.dto.CreatedProductRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +29,7 @@ public class ProductServiceImpl implements ProductService{
                 .send("product-created-events-topic", productId, event);
         future.whenComplete((result, error) -> {
            if(error != null){
-                LOG.error("Failed to send message " + error.getMessage());
+                LOG.error("Failed to send message {0} ", error.getMessage());
            }else {
                LOG.info("Message send succesfully " + result.getRecordMetadata());
                LOG.info("Partition: " + result.getRecordMetadata().partition());
